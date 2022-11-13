@@ -1,13 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const mongoose = require('mongoose')
+const sensorDataModel = require("./models");
+require('dotenv').config();
 
 const app = express();
 
 const port = process.env.PORT || 8000;
-
-let temperature = [];
-let humidity = [];
 
 app.use(cors());
 
@@ -15,19 +15,48 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.get('/',(req,res) => {
-    
-    res.send(`temp ${temperature.length} & humid ${humidity.length}`);
+const uri = process.env.URI;
+
+mongoose.connect(
+    uri,
+    {}
+  );
+
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error: "));
+db.once("open", function () {
+  console.log("Connected successfully");
 });
 
-app.post('/dht',(req,res)=>{
-    const data = req.body;
+app.get('/',async (req,res) => {
+    const retData = await sensorDataModel.find({});
 
-    console.log(data);
-    temperature.push(data.temp);
-    humidity.push(data.humid);
+    try{
+        res.send(retData)
+    }catch(error){
+        res.status(500).send(error);
+    }
+});
 
-    res.send('data is added to db');
+app.post('/dht',async (req,res)=>{
+    const sensor = req.body.sensor;
+    const temp = parseFloat(req.body.temp);
+    const humid = parseFloat(req.body.humid);
+
+    const data = {
+        "sensor":sensor,
+        "temperature":temp,
+        "humidity":humid,
+    };
+
+    const sensorData = new sensorDataModel(data);
+
+    try{
+        await sensorData.save();
+        res.send("data sent to database")
+    }catch(error){
+        response.status(500).send(error);
+    }
 });
 
 
