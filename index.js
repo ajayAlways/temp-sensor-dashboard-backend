@@ -55,7 +55,7 @@ app.post('/dht',async (req,res)=>{
         await sensorData.save();
         res.send("data sent to database")
     }catch(error){
-        response.status(500).send(error);
+        res.status(500).send(error);
     }
 });
 
