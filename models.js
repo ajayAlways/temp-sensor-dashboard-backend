@@ -1,21 +1,17 @@
 const mongoose = require("mongoose");
 
 const SensorSchema = new mongoose.Schema({
-  sensor: {
+  sensorId: {
     type: String,
     required: true,
   },
-  temperature: {
-    type: Number,
-    default: 0,
+  tempValues:{
+    type:Array,
+    required:true,
   },
-  humidity: {
-    type: Number,
-    default:0,
-  },
-  timestamp:{
-    type: Date,
-    default: Date.now
+  timeStamp:{
+    type: String,
+    required: true,
   }
 });
 

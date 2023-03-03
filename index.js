@@ -3,6 +3,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const mongoose = require('mongoose')
 const sensorDataModel = require("./models");
+const { query } = require('express');
 require('dotenv').config();
 
 const app = express();
@@ -28,8 +29,17 @@ db.once("open", function () {
   console.log("Connected successfully");
 });
 
+//To get all the collection of the data
 app.get('/',async (req,res) => {
-    const retData = await sensorDataModel.find({});
+    // const sensors = await sensorDataModel.distinct('sensorId');
+    // const retData = []
+    // sensors.forEach(async (sensor)=>{
+    //     data = {}
+    //     data[sensor]= await sensorDataModel.find({sensorId:sensor}).sort({timeStamp:-1});
+    //     retData.push(data);
+    // });
+
+    const retData = await sensorDataModel.find({}).sort({_id:-1})
 
     try{
         res.send(retData)
@@ -38,22 +48,82 @@ app.get('/',async (req,res) => {
     }
 });
 
-app.post('/dht',async (req,res)=>{
-    const sensor = req.body.sensor;
-    const temp = parseFloat(req.body.temp);
-    const humid = parseFloat(req.body.humid);
+// to get the latest temperature value 
+app.get('/latestTemp/:sensorId', async(req,res) => {
+    const sensorId = req.params.sensorId;
+    const retData = await sensorDataModel.find({sensorId:sensorId}).sort({_id:-1}).limit(1)
+    try{
+        res.send(retData)
+    }catch(error){
+        res.status(500).send(error);
+    }
+})
 
-    const data = {
-        "sensor":sensor,
-        "temperature":temp,
-        "humidity":humid,
-    };
+// to get the distinct sensors
+app.get('/sensors', async (req,res)=>{
+    const retData = await sensorDataModel.distinct('sensorId')
+    try{
+        res.send(retData)
+    }catch(error){
+        res.status(500).send(error);
+    }
+});
+
+// to post the temperature values
+app.post('/temp',async (req,res)=>{
+    const data = req.body;
+    console.log(data)
 
     const sensorData = new sensorDataModel(data);
 
     try{
         await sensorData.save();
         res.send("data sent to database")
+    }catch(error){
+        res.status(500).send(error);
+    }
+});
+
+// to get the temperature values of today
+app.get('/temp/today/:sensorId', async(req,res)=>{
+    // const sensorId = req.query.sensorId ? req.query.sensorId : null;
+    const sensorId = req.params.sensorId;
+    const date = req.query.date ? req.query.date : null;
+
+    const query = {};
+    if(sensorId && date){
+        query.$and = [
+            {sensorId:sensorId},
+            {timeStamp:{$gte:date}}
+        ]
+    }
+    const retData = await sensorDataModel.find(query).sort({timeStamp:-1})
+    try{
+        res.send(retData)
+    }catch(error){
+        res.status(500).send(error);
+    }
+});
+
+// to get the values inbetween the range
+app.get('/temp/range/:sensorId',async (req,res)=>{
+    // const sensorId = req.query.sensorId ? req.query.sensorId : null;
+    const sensorId = req.params.sensorId;
+    const from = req.query.from ? req.query.from : null;
+    const to = req.query.to ? req.query.to : null;
+
+    const query = {};
+    if(sensorId && from && to){
+        query.$and = [
+                {sensorId:sensorId},
+                {timeStamp:{$gte:from}},
+                {timeStamp:{$lte:to}}
+            ]
+    }
+
+    const retData = await sensorDataModel.find(query).sort({timeStamp:-1})
+    try{
+        res.send(retData)
     }catch(error){
         res.status(500).send(error);
     }
