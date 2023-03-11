@@ -121,7 +121,7 @@ app.get('/temp/range/:sensorId',async (req,res)=>{
             ]
     }
 
-    const retData = await sensorDataModel.find(query).sort({timeStamp:-1})
+    const retData = await sensorDataModel.find(query).sort({timeStamp:1})
     try{
         res.send(retData)
     }catch(error){
