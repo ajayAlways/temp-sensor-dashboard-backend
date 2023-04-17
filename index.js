@@ -32,13 +32,12 @@ db.once("open", function () {
 //To get all the collection of the data
 app.get('/',async (req,res) => {
     // const sensors = await sensorDataModel.distinct('sensorId');
-    // const retData = []
-    // sensors.forEach(async (sensor)=>{
-    //     data = {}
-    //     data[sensor]= await sensorDataModel.find({sensorId:sensor}).sort({timeStamp:-1});
-    //     retData.push(data);
+    // const retData = sensors.map(async (sensorId)=>{
+    //     let data = {};
+    //     data[sensorId]= await sensorDataModel.find({sensorId:sensorId}).sort({_id:-1});
+    //     return data;
     // });
-
+    // console.log(retData);
     const retData = await sensorDataModel.find({}).sort({_id:-1})
 
     try{
@@ -113,15 +112,16 @@ app.get('/temp/range/:sensorId',async (req,res)=>{
     const to = req.query.to ? req.query.to : null;
 
     const query = {};
+    let retData = [];
     if(sensorId && from && to){
         query.$and = [
                 {sensorId:sensorId},
                 {timeStamp:{$gte:from}},
                 {timeStamp:{$lte:to}}
             ]
+        retData = await sensorDataModel.find(query).sort({timeStamp:1});
     }
 
-    const retData = await sensorDataModel.find(query).sort({timeStamp:1})
     try{
         res.send(retData)
     }catch(error){

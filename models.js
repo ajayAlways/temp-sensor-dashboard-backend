@@ -10,7 +10,7 @@ const SensorSchema = new mongoose.Schema({
     required:true,
   },
   timeStamp:{
-    type: String,
+    type: Date,
     required: true,
   }
 });
