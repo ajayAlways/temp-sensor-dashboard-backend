@@ -89,14 +89,17 @@ app.get('/temp/today/:sensorId', async(req,res)=>{
     const sensorId = req.params.sensorId;
     const date = req.query.date ? req.query.date : null;
 
+    let retData = [];
     const query = {};
     if(sensorId && date){
+        const queryDate = new Date(date);
+        console.log(queryDate);
         query.$and = [
             {sensorId:sensorId},
-            {timeStamp:{$gte:date}}
+            {timeStamp:{$gte:queryDate}}
         ]
+        retData = await sensorDataModel.find(query).sort({timeStamp:-1})
     }
-    const retData = await sensorDataModel.find(query).sort({timeStamp:-1})
     try{
         res.send(retData)
     }catch(error){
@@ -114,10 +117,12 @@ app.get('/temp/range/:sensorId',async (req,res)=>{
     const query = {};
     let retData = [];
     if(sensorId && from && to){
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
         query.$and = [
                 {sensorId:sensorId},
-                {timeStamp:{$gte:from}},
-                {timeStamp:{$lte:to}}
+                {timeStamp:{$gte: { $date: fromDate }}},
+                {timeStamp:{$lte: { $date: toDate }}}
             ]
         retData = await sensorDataModel.find(query).sort({timeStamp:1});
     }
