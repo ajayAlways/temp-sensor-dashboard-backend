@@ -72,7 +72,7 @@ app.get('/sensors', async (req,res)=>{
 app.post('/temp',async (req,res)=>{
     let data = req.body;
     console.log(data);
-    data.timeStamp = new Date(data.timeStamp)
+    data.timeStamp = new Date((new Date(data.timeStamp)).toISOString())
     console.log(data);
 
     const sensorData = new sensorDataModel(data);
