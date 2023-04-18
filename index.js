@@ -70,22 +70,7 @@ app.get('/sensors', async (req,res)=>{
 
 // to post the temperature values
 app.post('/temp',async (req,res)=>{
-    let data = req.body;
-    console.log(data);
-    const inputDate = new Date(data.timeStamp);
-    // Convert input date to UTC
-    const utcDate = new Date(Date.UTC(
-        inputDate.getUTCFullYear(),
-        inputDate.getUTCMonth(),
-        inputDate.getUTCDate(),
-        inputDate.getUTCHours(),
-        inputDate.getUTCMinutes(),
-        inputDate.getUTCSeconds(),
-        inputDate.getUTCMilliseconds()
-    ));
-    data.timeStamp = utcDate;
-    console.log(data);
-
+    const data = req.body;
     const sensorData = new sensorDataModel(data);
 
     try{
