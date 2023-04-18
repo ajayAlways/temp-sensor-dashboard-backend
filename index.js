@@ -70,7 +70,9 @@ app.get('/sensors', async (req,res)=>{
 
 // to post the temperature values
 app.post('/temp',async (req,res)=>{
-    const data = req.body;
+    let data = req.body;
+    console.log(data);
+    data.timeStamp = new Date(data.timeStamp)
     console.log(data);
 
     const sensorData = new sensorDataModel(data);
